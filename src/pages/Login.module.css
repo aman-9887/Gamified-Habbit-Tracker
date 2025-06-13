@@ -1,0 +1,194 @@
+/* Reset default styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  /* Full-screen container with animated background */
+  .loginContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    overflow: hidden;
+    background: #0e0e0e; /* Black with subtle blue undertones */
+    background: linear-gradient(135deg, #0e0e0e 50%, #0b5179); /* Dark blue background */
+    color: white;
+    z-index: 1;
+  }
+  
+  /* Falling routine images */
+  .fallingItem {
+    position: absolute;
+    top: -60px;
+    animation: fall linear infinite;
+    opacity: 0.8;
+  }
+  
+  .fallingItem img {
+    width: 70px; /* Adjusted size to be a bit bigger */
+    height: 70px;
+    object-fit: contain;
+  }
+  
+  /* Increased animation distance for falling effect */
+  @keyframes fall {
+    0% {
+      transform: translateY(-100px) rotate(0deg);
+      opacity: 0.8;
+    }
+    100% {
+      transform: translateY(120vh) rotate(360deg);
+      opacity: 0;
+    }
+  }
+  
+  /* Individual timings and positions for each item */
+  .fallingItem:nth-child(1) { left: 6%; animation-duration: 13s; }
+  .fallingItem:nth-child(2) { left: 18%; animation-duration: 15s; }
+  .fallingItem:nth-child(3) { left: 30%; animation-duration: 14s; }
+  .fallingItem:nth-child(4) { left: 42%; animation-duration: 16s; }
+  .fallingItem:nth-child(5) { left: 59%; animation-duration: 18s; }
+  .fallingItem:nth-child(6) { left: 75%; animation-duration: 17s; }
+  .fallingItem:nth-child(7) { left: 88%; animation-duration: 19s; }
+  
+  
+  /* Login Box with Glassmorphism and glow */
+  .loginBox {
+    width: 400px;
+    padding: 40px;
+    background: rgba(90, 87, 87, 0.241);
+    border-radius: 16px;
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.4);
+    text-align: center;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.6);
+    position: relative;
+    z-index: 2;
+    animation: slideIn 1s ease-out;
+  }
+  
+  /* Neon pulse glow */
+  @keyframes pulseGlow {
+    0% { box-shadow: 0 0 10px rgba(0, 255, 255, 0.4); }
+    50% { box-shadow: 0 0 20px rgba(0, 255, 255, 0.8); }
+    100% { box-shadow: 0 0 10px rgba(0, 255, 255, 0.4); }
+  }
+  
+  .loginBox:hover {
+    animation: pulseGlow 2s infinite;
+  }
+  
+  /* Title */
+  .title {
+    font-size: 30px;
+    font-weight: bold;
+    color: #cbd0d4;
+    margin-bottom: 25px;
+    letter-spacing: 1px;
+  }
+  
+  /* Input Group */
+  .inputGroup {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    border: 1px solid #4c76b0;
+    border-radius: 8px;
+    padding: 10px;
+    background: rgba(211, 208, 208, 0.193);
+    transition: 0.3s;
+  }
+  
+  .inputGroup:hover {
+    background: rgba(0, 255, 255, 0.05);
+    box-shadow: 0 0 8px rgba(0, 255, 255, 0.4);
+  }
+  
+  /* Inputs */
+  .inputGroup input {
+    width: 100%;
+    border: none;
+    outline: none;
+    padding: 10px;
+    font-size: 16px;
+    background: transparent;
+    color: #fff;
+  }
+  
+  /* Icon styling */
+  .icon {
+    margin-right: 10px;
+    color: #00ffcc;
+  }
+  
+  /* Login Button */
+  .loginButton {
+    width: 100%;
+    padding: 12px;
+    background: #036180;
+    color: black;
+    font-size: 18px;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .loginButton:hover {
+    background: #59a7ab;
+    color: white;
+    box-shadow: 0px 0px 15px rgba(124, 187, 242, 0.7);
+  }
+  
+  /* Error Message */
+  .errorText {
+    color: #ff4d4d;
+    font-size: 14px;
+    margin-bottom: 10px;
+  }
+  
+  /* Success Message */
+  .successMessage {
+    font-size: 18px;
+    font-weight: bold;
+    color: #00ffcc;
+    animation: fadeIn 1s ease-in-out;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  /* Signup Link with animation */
+  .signupLink {
+    color: #9ac8d7;
+    font-weight: bold;
+    text-decoration: none;
+    position: relative;
+  }
+  
+  .signupLink::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    display: block;
+    margin-top: 5px;
+    right: 0;
+    background: #66dccd;
+    transition: width 0.3s ease;
+  }
+  
+  .signupLink:hover::after {
+    width: 100%;
+    left: 0;
+    right: auto;
+  }
+  

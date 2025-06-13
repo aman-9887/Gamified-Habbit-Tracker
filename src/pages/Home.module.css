@@ -1,0 +1,211 @@
+
+@keyframes moveBackground {
+  0% {
+      background-position: 0 0;
+  }
+  50% {
+      background-position: 100vw 0;
+  }
+  100% {
+      background-position: 0 0;
+  }
+}
+
+.typingHeading {
+font-size: 3.5rem;
+color: white;
+font-weight: bold;
+letter-spacing: 2px;
+user-select: none;
+white-space: nowrap;
+}
+
+.cursor {
+display: inline-block;
+width: 1ch;
+animation: blink 1s step-start infinite;
+color: white;
+}
+
+@keyframes blink {
+50% {
+  opacity: 0;
+}
+}
+
+.homeContainer {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  background: url('C:\gamified-habit-tracker\public\GAME BG.png') repeat-x; /* Ensure the image repeats horizontally */
+  background-size: cover;
+  background-color: #0d0d0d;
+  color: black;
+  text-align: center;
+  padding: 20px;
+  animation: moveBackground 40s linear infinite;
+}
+
+/* Hero Section */
+
+
+/* Headings */
+h1 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  width: 0;
+  border-right: 4px solid black;
+  animation: typing 3s steps(30) 1s forwards, blinkCaret 0.75s step-end 4; /* caret blinks 4 times and stops */
+}
+
+p {
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+  color: #bdb9b9;
+}
+
+/* Button: Larger, more attractive, with heartbeat blink animation */
+/* Button: Larger, more attractive, with heartbeat blink animation */
+.btnLarge {
+  margin-top: 30px;
+  text-decoration: none;
+  font-size: 2rem; /* Increased font size */
+  padding: 18px 35px; /* Larger padding for more emphasis */
+  border-radius: 50px; /* More rounded edges for a modern look */
+  background: linear-gradient(135deg, #a1d0e7, #62a4c0); /* Light blue gradient */
+  color: white;
+  font-weight: bold;
+  text-transform: uppercase; /* Makes the text all caps for emphasis */
+  transition: transform 0.4s ease, box-shadow 0.4s ease, background-color 0.3s ease;
+  box-shadow: 0 10px 20px rgba(84, 110, 149, 0.5); /* Soft shadow */
+  display: inline-block;
+  cursor: pointer;
+  position: relative;
+  animation: heartbeat 1.5s ease-in-out infinite, sparkle 2s ease-in-out infinite; /* Heartbeat animation added */
+}
+
+/* Heartbeat animation for pulsing */
+@keyframes heartbeat {
+  0%, 100% {
+      transform: scale(1); /* Normal size */
+  }
+  50% {
+      transform: scale(1.1); /* Slightly larger size to mimic the heartbeat */
+  }
+}
+
+/* Sparkle effect on the button */
+@keyframes sparkle {
+  0% {
+      box-shadow: 0 0 10px #5fa9d1, 0 0 20px #5fa9d1, 0 0 30px #a1d0e7, 0 0 40px #a1d0e7;
+  }
+  50% {
+      box-shadow: 0 0 10px #a1d0e7, 0 0 20px #a1d0e7, 0 0 30px #5fa9d1, 0 0 40px #5fa9d1;
+  }
+  100% {
+      box-shadow: 0 0 10px #5fa9d1, 0 0 20px #5fa9d1, 0 0 30px #a1d0e7, 0 0 40px #a1d0e7;
+  }
+}
+
+/* Hover effect for the "Get Started" button */
+.btnLarge:hover {
+  transform: scale(1.1); /* Slightly enlarges on hover */
+  background-color: #5fa9d1; /* Lighter blue on hover */
+  box-shadow: 0 15px 30px rgba(84, 110, 149, 0.6); /* Stronger shadow on hover */
+}
+
+.aboutWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+  margin-top: 100px;
+  padding: 40px 20px;
+}
+
+.aboutBox {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid #61dafb;
+  border-radius: 20px;
+  padding: 25px;
+  max-width: 700px;
+  width: 90%;
+  color: white;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  transform: translateY(50px);
+  animation: fadeIn 1s ease-out forwards;
+}
+
+.aboutBox h3 {
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+}
+
+.aboutBox p {
+  font-size: 1.1rem;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fadeInLeft {
+  animation: fadeInLeft 1s ease-out forwards;
+}
+
+.fadeInRight {
+  animation: fadeInRight 1s ease-out forwards;
+}
+
+.fadeInUp {
+  animation: fadeInUp 1s ease-out forwards;
+}
+
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+
+

@@ -1,0 +1,198 @@
+/* Animate on load */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Floating icons animation */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Global container */
+.aboutContainer {
+  margin-top: 2vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  position: relative;
+  min-height: 80vh;
+  width: 100vw;
+  background: url('../assets/parallax-bg.png') no-repeat center center fixed;
+  background-size: cover;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 20px;
+  color: white;
+  overflow-x: hidden;
+}
+
+/* Section box */
+.section {
+  background-color: rgba(90, 119, 129, 0.312);
+  padding: 40px;
+  border-radius: 12px;
+  max-width: 900px;
+  width: 100%;
+  margin-bottom: 30px;
+  text-align: center;
+  opacity: 0;
+  transform: scale(0.95);
+  animation: fadeInUp 1.2s ease forwards;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+  animation-delay: 0.3s;
+}
+
+.section:first-child {
+  margin-top: 40px; /* or remove this block entirely */
+}
+
+/* Headings and Text */
+.sectionHeading {
+  font-size: 3rem;
+  margin-bottom: 20px;
+  color: #f8f8f8;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+/* Section text styling */
+.sectionText {
+  font-size: 1.2rem;
+  font-style: oblique;
+  line-height: 1.6;
+  color: #b0b8ba;
+}
+
+/* Journey section */
+.journeyBox {
+  display: flex;
+  flex-direction: row;
+  gap: 30px;
+  margin-top: 30px;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 30px;
+  border-radius: 12px;
+}
+
+/* Journey items */
+.journeyItem {
+  background-color: rgba(173, 216, 230, 0.7);
+  padding: 25px;
+  border-radius: 10px;
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  transform: scale(0.9);
+  animation: fadeInUp 1s ease forwards;
+  animation-delay: calc(0.3s + var(--i) * 0.2s);
+  transition: all 0.4s ease;
+}
+
+/* Hover effect */
+.journeyItem:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+  background-color: rgba(173, 216, 230, 0.9);
+}
+
+/* Journey icon */
+.journeyIcon {
+  font-size: 3rem;
+  margin-bottom: 10px;
+  color: #f8d800;
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Journey Item Heading */
+.journeyItem h3 {
+  font-size: 1.6rem;
+  color: #fff;
+  margin-bottom: 10px;
+}
+
+/* Journey Item Text */
+.journeyItem p {
+  font-size: 1rem;
+  color: #333;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .sectionHeading {
+    font-size: 2rem;
+  }
+
+  .sectionText,
+  .journeyItem p {
+    font-size: 1rem;
+  }
+
+  .journeyItem h3 {
+    font-size: 1.3rem;
+  }
+
+  .journeyIcon {
+    font-size: 2.5rem;
+  }
+
+  .section:first-child {
+    margin-top: 80px;
+  }
+
+  .journeyBox {
+    flex-direction: column;
+  }
+
+  .journeyItem {
+    max-width: 90%;
+    margin: 0 auto 20px auto;
+  }
+}
+/* Team Section */
+.teamBox {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+  margin-top: 30px;
+  justify-content: center;
+  align-items: center;
+}
+
+.teamMember {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  width: 200px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.teamMember:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 20px rgba(255, 255, 255, 0.2);
+}
+
+.teamImg {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin-bottom: 15px;
+  border: 3px solid #f8d800;
+}
