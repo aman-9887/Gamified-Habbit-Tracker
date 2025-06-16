@@ -171,6 +171,19 @@ const styles = {
     fontWeight: "bold",
     transition: "all 0.3s ease",
   },
+  journeyButtonActive: {
+    marginTop: "30px",
+    padding: "15px 30px",
+    fontSize: "18px",
+    backgroundColor: "#00ff00",
+    color: "black",
+    border: "none",
+    borderRadius: "10px",
+    cursor: "pointer",
+    fontWeight: "bold",
+    transition: "all 0.3s ease",
+    boxShadow: "0 0 15px rgba(0, 255, 0, 0.5)",
+  },
   journeyButtonDisabled: {
     marginTop: "30px",
     padding: "15px 30px",
@@ -191,71 +204,45 @@ const styles = {
     textAlign: "center",
     fontStyle: "italic",
   },
+  gameSessionInfo: {
+    marginTop: "10px",
+    fontSize: "16px",
+    color: "#00ff00",
+    textAlign: "center",
+    fontWeight: "bold",
+    padding: "10px",
+    backgroundColor: "rgba(0, 255, 0, 0.1)",
+    borderRadius: "10px",
+    border: "1px solid rgba(0, 255, 0, 0.3)",
+  },
+  earnedTimeInfo: {
+    marginTop: "5px",
+    fontSize: "14px",
+    color: "#ffcc00",
+    textAlign: "center",
+  },
   whiteText: {
     color: "#ffffff",
     marginBottom: "10px",
   },
+  startSessionButton: {
+    marginTop: "10px",
+    padding: "10px 20px",
+    fontSize: "14px",
+    backgroundColor: "#28a745",
+    color: "white",
+    border: "none",
+    borderRadius: "5px",
+    cursor: "pointer",
+    fontWeight: "bold",
+  },
 };
-
-// const FallingEmojis = () => {
-//   const emojis = ["🔥", "⏰"];
-//   const count = 30;
-//   const [emojiStyles, setEmojiStyles] = useState([]);
-
-//   useEffect(() => {
-//     const styleTag = document.createElement("style");
-//     styleTag.innerHTML = `
-//       @keyframes fall {
-//         0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
-//         100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
-//       }
-//     `;
-//     document.head.appendChild(styleTag);
-
-//     const generatedStyles = Array.from({ length: count }).map(() => ({
-//       position: "absolute",
-//       top: `-${Math.random() * 100}px`,
-//       left: `${Math.random() * 100}vw`,
-//       fontSize: `${Math.random() * 24 + 24}px`,
-//       animation: `fall ${Math.random() * 5 + 5}s linear infinite`,
-//       animationDelay: `${Math.random() * 5}s`,
-//       zIndex: 0,
-//       pointerEvents: "none",
-//       userSelect: "none",
-//     }));
-
-//     setEmojiStyles(generatedStyles);
-
-//     return () => {
-//       document.head.removeChild(styleTag);
-//     };
-//   }, []);
-
-//   return (
-//     <div
-//       style={{
-//         position: "fixed",
-//         width: "100vw",
-//         height: "100vh",
-//         overflow: "hidden",
-//         pointerEvents: "none",
-//         top: 0,
-//         left: 0,
-//         zIndex: 0,
-//       }}
-//     >
-//       {emojiStyles.map((style, i) => (
-//         <div key={i} style={style}>
-//           {emojis[Math.floor(Math.random() * emojis.length)]}
-//         </div>
-//       ))}
-//     </div>
-//   );
-// };
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const successAudioRef = useRef(null);
+  const countdownIntervalRef = useRef(null);
+  
   const [habits, setHabits] = useState([]);
   const [newHabit, setNewHabit] = useState("");
   const [progress, setProgress] = useState({ totalDays: 0, completedDays: 0, percentage: 0 });
@@ -263,81 +250,184 @@ const Dashboard = () => {
   const [motivationalMessage, setMotivationalMessage] = useState("");
   const [showWelcome, setShowWelcome] = useState(true);
   const [userName, setUserName] = useState("");
-  const [todayGameTime, setTodayGameTime] = useState("00:00");
   const [dataFetched, setDataFetched] = useState(false);
+  
+  // Game session states
+  const [earnedGameTime, setEarnedGameTime] = useState(0); // in minutes
+  const [isGameSessionActive, setIsGameSessionActive] = useState(false);
+  const [remainingTime, setRemainingTime] = useState(0); // in seconds
+  const [gameSessionStartTime, setGameSessionStartTime] = useState(null);
 
-
-  // Check if user has earned game time
-  const hasGameTime = todayGameTime !== "00:00";
-
-const saveUserDataToFirestore = async (habitsData, rewardPointsData, progressData) => {
-  if (!dataFetched) return; // ⛔ prevent premature save
-  const user = auth.currentUser;
-  if (user) {
-    try {
-      const userDocRef = doc(db, "users", user.uid);
-      await setDoc(userDocRef, {
-        fullName: userName,
-        email: user.email,
-        habits: habitsData,
-        rewardPoints: rewardPointsData,
-        progress: progressData,
-      }, { merge: true });
-    } catch (error) {
-      console.error("Error saving user data to Firestore:", error);
-    }
-  }
-};
-
-   const fetchUserDataFromFirestore = async () => {
-  const user = auth.currentUser;
-  if (user) {
-    try {
-      const docRef = doc(db, "users", user.uid);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        setUserName(data.fullName || user.email);
-        setHabits(data.habits || []);
-        setRewardPoints(data.rewardPoints || 0);
-        setProgress(data.progress || { totalDays: 0, completedDays: 0, percentage: 0 });
-      } else {
-        // New user — optional: create empty doc or wait for first save
-        setUserName(user.email);
-      }
-      setDataFetched(true); // ✅ Mark data as loaded
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-      setDataFetched(true); // Even if failed, avoid blocking updates
-    }
-  }
-};
-
-  useEffect(() => {
-  fetchMotivationalMessage();
-  const timer = setTimeout(() => setShowWelcome(false), 3000);
-
-  const unsubscribe = onAuthStateChanged(auth, (user) => {
-    if (user) {
-      fetchUserDataFromFirestore();
-    }
-  });
-
-  return () => {
-    clearTimeout(timer);
-    unsubscribe(); // Cleanup auth listener
+  // Helper function to convert time strings to minutes
+  const parseTimeToMinutes = (timeString) => {
+    if (timeString === "00:00") return 0;
+    if (timeString === "20m") return 20;
+    if (timeString === "15m") return 15;
+    if (timeString === "5m") return 5;
+    if (timeString === "1m") return 1;
+    return 0;
   };
-}, []);
 
-  const calculateTodayGameTime = (habits) => {
+  // Helper function to format time display
+  const formatTime = (seconds) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    
+    if (hours > 0) {
+      return `${hours}h ${minutes}m ${secs}s`;
+    } else if (minutes > 0) {
+      return `${minutes}m ${secs}s`;
+    } else {
+      return `${secs}s`;
+    }
+  };
+
+  // Save user data including game session info
+  const saveUserDataToFirestore = async (habitsData, rewardPointsData, progressData, gameSessionData = null) => {
+    if (!dataFetched) return;
+    const user = auth.currentUser;
+    if (user) {
+      try {
+        const userDocRef = doc(db, "users", user.uid);
+        const dataToSave = {
+          fullName: userName,
+          email: user.email,
+          habits: habitsData,
+          rewardPoints: rewardPointsData,
+          progress: progressData,
+        };
+
+        if (gameSessionData) {
+          dataToSave.gameSession = gameSessionData;
+        }
+
+        await setDoc(userDocRef, dataToSave, { merge: true });
+      } catch (error) {
+        console.error("Error saving user data to Firestore:", error);
+      }
+    }
+  };
+
+  // Fetch user data including game session info
+  const fetchUserDataFromFirestore = async () => {
+    const user = auth.currentUser;
+    if (user) {
+      try {
+        const docRef = doc(db, "users", user.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setUserName(data.fullName || user.email);
+          setHabits(data.habits || []);
+          setRewardPoints(data.rewardPoints || 0);
+          setProgress(data.progress || { totalDays: 0, completedDays: 0, percentage: 0 });
+          
+          // Restore game session if exists
+          if (data.gameSession) {
+            const { isActive, startTime, duration, earnedTime } = data.gameSession;
+            setEarnedGameTime(earnedTime || 0);
+            
+            if (isActive && startTime) {
+              const now = Date.now();
+              const elapsed = Math.floor((now - startTime) / 1000);
+              const remaining = (duration * 60) - elapsed;
+              
+              if (remaining > 0) {
+                setIsGameSessionActive(true);
+                setRemainingTime(remaining);
+                setGameSessionStartTime(startTime);
+                startCountdown(remaining);
+              } else {
+                // Session expired, clean up
+                endGameSession();
+              }
+            }
+          }
+        } else {
+          setUserName(user.email);
+        }
+        setDataFetched(true);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        setDataFetched(true);
+      }
+    }
+  };
+
+  // Start countdown timer
+  const startCountdown = (initialTime) => {
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+    }
+    
+    countdownIntervalRef.current = setInterval(() => {
+      setRemainingTime(prev => {
+        if (prev <= 1) {
+          endGameSession();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  // Start game session
+  const startGameSession = () => {
+    if (earnedGameTime > 0) {
+      const startTime = Date.now();
+      const durationInSeconds = earnedGameTime * 60;
+      
+      setIsGameSessionActive(true);
+      setRemainingTime(durationInSeconds);
+      setGameSessionStartTime(startTime);
+      
+      // Save session to database
+      const gameSessionData = {
+        isActive: true,
+        startTime: startTime,
+        duration: earnedGameTime,
+        earnedTime: earnedGameTime
+      };
+      
+      saveUserDataToFirestore(habits, rewardPoints, progress, gameSessionData);
+      startCountdown(durationInSeconds);
+    }
+  };
+
+  // End game session
+  const endGameSession = () => {
+    setIsGameSessionActive(false);
+    setRemainingTime(0);
+    setGameSessionStartTime(null);
+    setEarnedGameTime(0);
+    
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+      countdownIntervalRef.current = null;
+    }
+    
+    // Clear session from database
+    const gameSessionData = {
+      isActive: false,
+      startTime: null,
+      duration: 0,
+      earnedTime: 0
+    };
+    
+    saveUserDataToFirestore(habits, rewardPoints, progress, gameSessionData);
+  };
+
+  // Calculate earned game time based on completed habits
+  const calculateEarnedGameTime = (habits) => {
     const today = new Date().toDateString();
     const total = habits.length;
     const completedToday = habits.filter(h => h.completedDays.includes(today)).length;
 
-    if (completedToday === 0) return "00:00";
-    if (completedToday === total) return "1h 30m";
-    if (completedToday >= Math.ceil(total / 2)) return "1h 0m";
-    return "30m";
+    if (completedToday === 0) return 0;
+    if (completedToday === total) return 20; // 1h 30m
+    if (completedToday >= Math.ceil(total / 2)) return 15; // 1h
+    return 5; // 30m
   };
 
   const updateProgress = useCallback(() => {
@@ -350,9 +440,34 @@ const saveUserDataToFirestore = async (habitsData, rewardPointsData, progressDat
     const percentage = totalDays > 0 ? Math.round((completedDays / totalDays) * 100) : 0;
     const updatedProgress = { totalDays, completedDays, percentage };
     setProgress(updatedProgress);
+    
+    // Update earned game time but don't overwrite active session
+    if (!isGameSessionActive) {
+      const newEarnedTime = calculateEarnedGameTime(habits);
+      setEarnedGameTime(newEarnedTime);
+    }
+    
     saveUserDataToFirestore(habits, rewardPoints, updatedProgress);
-    setTodayGameTime(calculateTodayGameTime(habits));
-  }, [habits, rewardPoints]);
+  }, [habits, rewardPoints, isGameSessionActive]);
+
+  useEffect(() => {
+    fetchMotivationalMessage();
+    const timer = setTimeout(() => setShowWelcome(false), 3000);
+
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        fetchUserDataFromFirestore();
+      }
+    });
+
+    return () => {
+      clearTimeout(timer);
+      unsubscribe();
+      if (countdownIntervalRef.current) {
+        clearInterval(countdownIntervalRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const today = new Date();
@@ -368,12 +483,10 @@ const saveUserDataToFirestore = async (habitsData, rewardPointsData, progressDat
   }, []);
 
   useEffect(() => {
-    // localStorage.setItem("habits", JSON.stringify(habits));
     updateProgress();
   }, [habits, updateProgress]);
 
   useEffect(() => {
-    // localStorage.setItem("rewardPoints", JSON.stringify(rewardPoints));
     saveUserDataToFirestore(habits, rewardPoints, progress);
   }, [rewardPoints]);
 
@@ -428,19 +541,48 @@ const saveUserDataToFirestore = async (habitsData, rewardPointsData, progressDat
   };
 
   const handlePlayButtonClick = () => {
-    if (hasGameTime) {
+    if (isGameSessionActive) {
       navigate("/visual-journey");
     }
   };
 
   const chartData = {
     labels: habits.map(h => h.name),
-    datasets: [{ label: "Completion %", data: habits.map(h => (h.completedDays.length / 7) * 100), backgroundColor: "#00ccff", borderRadius: 5 }],
+    datasets: [{ 
+      label: "Completion %", 
+      data: habits.map(h => (h.completedDays.length / 7) * 100), 
+      backgroundColor: "#00ccff", 
+      borderRadius: 5 
+    }],
   };
+
+  // Determine button style and text
+  const getButtonConfig = () => {
+    if (isGameSessionActive) {
+      return {
+        style: styles.journeyButtonActive,
+        text: "🎮 Play Now!",
+        disabled: false
+      };
+    } else if (earnedGameTime > 0) {
+      return {
+        style: styles.journeyButton,
+        text: "🎯 Start Game Session",
+        disabled: false
+      };
+    } else {
+      return {
+        style: styles.journeyButtonDisabled,
+        text: "🎮 Complete Habits to Play",
+        disabled: true
+      };
+    }
+  };
+
+  const buttonConfig = getButtonConfig();
 
   return (
     <div style={styles.container}>
-      {/* <FallingEmojis /> */}
       {showWelcome && <div style={styles.welcomeBox}>Welcome, {userName || "User"}! 🚀</div>}
       <div style={styles.subheading}>LET'S MAINTAIN STREAKS & TRACK YOUR HABITS!</div>
       <div style={styles.content}>
@@ -459,11 +601,16 @@ const saveUserDataToFirestore = async (habitsData, rewardPointsData, progressDat
           </div>
           <div style={styles.progressContainer}>
             <p>Progress: {progress.percentage}%</p>
-            <div style={styles.progressBar}><div style={{ ...styles.progressFill, width: `${progress.percentage}%` }} /></div>
+            <div style={styles.progressBar}>
+              <div style={{ ...styles.progressFill, width: `${progress.percentage}%` }} />
+            </div>
           </div>
           <div style={styles.rewards}>
             <p>🎁 Reward Points: {rewardPoints}</p>
-            <p>🎮 Game Time Reward: {todayGameTime}</p>
+            <p>⏰ Earned Game Time: {earnedGameTime > 0 ? `${earnedGameTime}m` : "0m"}</p>
+            {isGameSessionActive && (
+              <p>🎮 Active Session: {formatTime(remainingTime)}</p>
+            )}
           </div>
           <div style={styles.chartContainer}><Bar data={chartData} /></div>
         </div>
@@ -494,14 +641,26 @@ const saveUserDataToFirestore = async (habitsData, rewardPointsData, progressDat
       
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <button 
-          onClick={handlePlayButtonClick} 
-          style={hasGameTime ? styles.journeyButton : styles.journeyButtonDisabled}
-          disabled={!hasGameTime}
+          onClick={isGameSessionActive ? handlePlayButtonClick : startGameSession}
+          style={buttonConfig.style}
+          disabled={buttonConfig.disabled}
         >
-          🎮 {hasGameTime ? "Let's Play" : "Complete Habits to Play"}
+          {buttonConfig.text}
         </button>
         
-        {!hasGameTime && (
+        {isGameSessionActive && (
+          <div style={styles.gameSessionInfo}>
+            🎮 Game Session Active! Time Remaining: {formatTime(remainingTime)}
+          </div>
+        )}
+        
+        {!isGameSessionActive && earnedGameTime > 0 && (
+          <div style={styles.earnedTimeInfo}>
+            🎯 You've earned {earnedGameTime} minutes of game time! Click to start your session.
+          </div>
+        )}
+        
+        {!isGameSessionActive && earnedGameTime === 0 && (
           <div style={styles.gameTimeMessage}>
             💡 Complete at least one habit today to unlock game time!
           </div>
