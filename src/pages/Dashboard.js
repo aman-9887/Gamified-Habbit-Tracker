@@ -13,6 +13,7 @@ import {
 } from "chart.js";
 import { auth, db } from "../firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
@@ -168,6 +169,27 @@ const styles = {
     borderRadius: "10px",
     cursor: "pointer",
     fontWeight: "bold",
+    transition: "all 0.3s ease",
+  },
+  journeyButtonDisabled: {
+    marginTop: "30px",
+    padding: "15px 30px",
+    fontSize: "18px",
+    backgroundColor: "#666666",
+    color: "#cccccc",
+    border: "none",
+    borderRadius: "10px",
+    cursor: "not-allowed",
+    fontWeight: "bold",
+    opacity: 0.6,
+    transition: "all 0.3s ease",
+  },
+  gameTimeMessage: {
+    marginTop: "10px",
+    fontSize: "14px",
+    color: "#ffcc00",
+    textAlign: "center",
+    fontStyle: "italic",
   },
   whiteText: {
     color: "#ffffff",
@@ -234,59 +256,78 @@ const styles = {
 const Dashboard = () => {
   const navigate = useNavigate();
   const successAudioRef = useRef(null);
-  const [habits, setHabits] = useState(() => JSON.parse(localStorage.getItem("habits")) || []);
+  const [habits, setHabits] = useState([]);
   const [newHabit, setNewHabit] = useState("");
   const [progress, setProgress] = useState({ totalDays: 0, completedDays: 0, percentage: 0 });
-  const [rewardPoints, setRewardPoints] = useState(() => JSON.parse(localStorage.getItem("rewardPoints")) || 0);
+  const [rewardPoints, setRewardPoints] = useState(0);
   const [motivationalMessage, setMotivationalMessage] = useState("");
   const [showWelcome, setShowWelcome] = useState(true);
   const [userName, setUserName] = useState("");
   const [todayGameTime, setTodayGameTime] = useState("00:00");
+  const [dataFetched, setDataFetched] = useState(false);
 
-  const saveUserDataToFirestore = async (habitsData, rewardPointsData, progressData) => {
-    const user = auth.currentUser;
-    console.log("Saving data for user:", user.uid, user.email);
-    if (user) {
-      try {
-        const userDocRef = doc(db, "users", user.uid);
-        await setDoc(userDocRef, {
-          fullName: userName,
-          email: user.email,
-          habits: habitsData,
-          rewardPoints: rewardPointsData,
-          progress: progressData,
-        }, { merge: true });
-      } catch (error) {
-        console.error("Error saving user data to Firestore:", error);
-      }
+
+  // Check if user has earned game time
+  const hasGameTime = todayGameTime !== "00:00";
+
+const saveUserDataToFirestore = async (habitsData, rewardPointsData, progressData) => {
+  if (!dataFetched) return; // ⛔ prevent premature save
+  const user = auth.currentUser;
+  if (user) {
+    try {
+      const userDocRef = doc(db, "users", user.uid);
+      await setDoc(userDocRef, {
+        fullName: userName,
+        email: user.email,
+        habits: habitsData,
+        rewardPoints: rewardPointsData,
+        progress: progressData,
+      }, { merge: true });
+    } catch (error) {
+      console.error("Error saving user data to Firestore:", error);
     }
-  };
+  }
+};
+
+   const fetchUserDataFromFirestore = async () => {
+  const user = auth.currentUser;
+  if (user) {
+    try {
+      const docRef = doc(db, "users", user.uid);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setUserName(data.fullName || user.email);
+        setHabits(data.habits || []);
+        setRewardPoints(data.rewardPoints || 0);
+        setProgress(data.progress || { totalDays: 0, completedDays: 0, percentage: 0 });
+      } else {
+        // New user — optional: create empty doc or wait for first save
+        setUserName(user.email);
+      }
+      setDataFetched(true); // ✅ Mark data as loaded
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      setDataFetched(true); // Even if failed, avoid blocking updates
+    }
+  }
+};
 
   useEffect(() => {
-    fetchMotivationalMessage();
-    const timer = setTimeout(() => setShowWelcome(false), 3000);
-    const user = auth.currentUser;
+  fetchMotivationalMessage();
+  const timer = setTimeout(() => setShowWelcome(false), 3000);
 
+  const unsubscribe = onAuthStateChanged(auth, (user) => {
     if (user) {
-      const fetchName = async () => {
-        try {
-          const docRef = doc(db, "users", user.uid);
-          const docSnap = await getDoc(docRef);
-          if (docSnap.exists()) {
-            const data = docSnap.data();
-            setUserName(data.fullName || user.email);
-          } else {
-            setUserName(user.email);
-          }
-        } catch {
-          setUserName(user.email);
-        }
-      };
-      fetchName();
+      fetchUserDataFromFirestore();
     }
+  });
 
-    return () => clearTimeout(timer);
-  }, []);
+  return () => {
+    clearTimeout(timer);
+    unsubscribe(); // Cleanup auth listener
+  };
+}, []);
 
   const calculateTodayGameTime = (habits) => {
     const today = new Date().toDateString();
@@ -327,12 +368,12 @@ const Dashboard = () => {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("habits", JSON.stringify(habits));
+    // localStorage.setItem("habits", JSON.stringify(habits));
     updateProgress();
   }, [habits, updateProgress]);
 
   useEffect(() => {
-    localStorage.setItem("rewardPoints", JSON.stringify(rewardPoints));
+    // localStorage.setItem("rewardPoints", JSON.stringify(rewardPoints));
     saveUserDataToFirestore(habits, rewardPoints, progress);
   }, [rewardPoints]);
 
@@ -386,6 +427,12 @@ const Dashboard = () => {
     setHabits(habits.filter((_, i) => i !== index));
   };
 
+  const handlePlayButtonClick = () => {
+    if (hasGameTime) {
+      navigate("/visual-journey");
+    }
+  };
+
   const chartData = {
     labels: habits.map(h => h.name),
     datasets: [{ label: "Completion %", data: habits.map(h => (h.completedDays.length / 7) * 100), backgroundColor: "#00ccff", borderRadius: 5 }],
@@ -395,7 +442,7 @@ const Dashboard = () => {
     <div style={styles.container}>
       {/* <FallingEmojis /> */}
       {showWelcome && <div style={styles.welcomeBox}>Welcome, {userName || "User"}! 🚀</div>}
-      <div style={styles.subheading}>LET’S MAINTAIN STREAKS & TRACK YOUR HABITS!</div>
+      <div style={styles.subheading}>LET'S MAINTAIN STREAKS & TRACK YOUR HABITS!</div>
       <div style={styles.content}>
         <div style={styles.leftSection}>
           <div style={styles.motivation}><FaBell /> {motivationalMessage}</div>
@@ -444,7 +491,23 @@ const Dashboard = () => {
           </table>
         </div>
       </div>
-      <button onClick={() => navigate("/visual-journey")} style={styles.journeyButton}>🎮 Let's Play</button>
+      
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <button 
+          onClick={handlePlayButtonClick} 
+          style={hasGameTime ? styles.journeyButton : styles.journeyButtonDisabled}
+          disabled={!hasGameTime}
+        >
+          🎮 {hasGameTime ? "Let's Play" : "Complete Habits to Play"}
+        </button>
+        
+        {!hasGameTime && (
+          <div style={styles.gameTimeMessage}>
+            💡 Complete at least one habit today to unlock game time!
+          </div>
+        )}
+      </div>
+      
       <audio ref={successAudioRef} src="/success.mp3" preload="auto" />
     </div>
   );
