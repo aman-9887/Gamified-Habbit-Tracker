@@ -40,7 +40,7 @@ color: white;
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  background: url('C:\gamified-habit-tracker\public\GAME BG.png') repeat-x; /* Ensure the image repeats horizontally */
+  background: url('../../public/GAME\ BG.png') repeat-x; /* Ensure the image repeats horizontally */
   background-size: cover;
   background-color: #0d0d0d;
   color: black;
